@@ -1,24 +1,25 @@
-# Korean Vulhub (한글판)
+# CVE-2025-1974
+> 화이트햇 스쿨 3기 - [김소은 (@salt318)] (https://github.com/salt318/vulhub)
 
-![logo](./README.assets/logo.svg)
+### 요약
 
-[Vulhub](https://github.com/vulhub/vulhub) (<https://vulhub.org/>) 을 기반으로 한국어 번역 및 컨텐츠를 추가하는 것을 목표로 공동작업합니다.
+- 쿠버네티스의 핵심 보안 메커니즘인 Ingress-NGINX Admission Controller의 결함으로 인해 발생
+- Ingress-NGINX Admission Controller는 인증 없이 네트워크에 노출됨
+- 이로 인해 공격자가 악성 AdmissionReview 요청을 조작하여 Ingress 리소스에 무단 구성을 삽입할 수 있음
+- 다른 취약점과 연계될 겨여우 원격 코드 실행 가능 (CVE-2025-24514, CVE-2025-1097 또는 CVE-2025-1098)
 
-차세대 보안리더 양성 프로그램 화이트햇 스쿨 수강생들이 기여하고 있습니다.
 
-<br/>
+### 환경 구성 및 실행
+- `docker compose up -d`를 실행하여 테스트 환경을 실행 (K3s 기반 Kubernetes 환경)
+- 악성 쉘 코드를 컴파일
+```
+gcc -shared -fPIC -o shell.so shell.c
+```
+- 아래의 명령어를 통해 취약점 악용
+  ```
+  python exploit.py -a https://localhost:30443/networking/v1/ingresses -i http://localhost:30080/fake/addr -s shell.so
+  ```
+### 실행 결과
+![CVE-2025-1974](https://github.com/salt318/CVE-2025-1974/blob/main/CVE-2025-1974.png)
 
-### Table of Contents
-
-- Django
-  - [CVE-2021-35042](./_Django/CVE-2021-35042/README.md) | QuerySet.order_by() SQL Injection
-- Express
-  - [CVE-2024-29041](./Express/CVE-2024-29041/README.md) | Express 오픈 리다이렉트 취약점
-- Flask
-  - [SSTI](./Flask/SSTI/README.md) | Server Side Template Injection
-- MySQL
-  - [CVE-2012-2122](./MySQL/CVE-2012-2122/README.md) | MySQL Authentication Bypass
-- Next.js
-  - [CVE-2025-29927](./Next.js/CVE-2025-29927/README.md) | Next.js 미들웨어 인가 우회
-- Nginx
-  - [CVE-2017-7529](./Nginx/CVE-2017-7529/README.md) | Nginx Integer Overflow Vulnerability
+### 정리
